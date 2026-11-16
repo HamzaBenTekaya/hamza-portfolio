@@ -1,0 +1,106 @@
+@import "tailwindcss";
+@source "../**/*.{js,jsx,ts,tsx}";
+/* ↑ Tailwind v4: explicit source scan for TSX files */
+
+:root {
+  --bg:             #f8f9fa;
+  --bg-card:        #ffffff;
+  --bg-hover:       #f1f3f5;
+  --border:         #e2e8f0;
+  --text-primary:   #0f172a;
+  --text-secondary: #475569;
+  --text-muted:     #94a3b8;
+  --accent:         #0284c7;
+  --accent-soft:    #e0f2fe;
+  --tag-bg:         #f1f5f9;
+  --tag-text:       #475569;
+  --timeline-line:  #cbd5e1;
+
+  /* Rich Accent Tokens - Light */
+  --gold:           #d97706;
+  --gold-bg:        rgba(217, 119, 6, 0.10);
+  --gold-border:    rgba(217, 119, 6, 0.28);
+
+  --cyan:           #0284c7;
+  --cyan-bg:        rgba(2, 132, 199, 0.10);
+  --cyan-border:    rgba(2, 132, 199, 0.28);
+
+  --emerald:        #059669;
+  --emerald-bg:     rgba(5, 150, 105, 0.10);
+  --emerald-border: rgba(5, 150, 105, 0.28);
+
+  --purple:         #7c3aed;
+  --purple-bg:      rgba(124, 58, 237, 0.10);
+  --purple-border:  rgba(124, 58, 237, 0.28);
+
+  --rose:           #e11d48;
+  --rose-bg:        rgba(225, 29, 72, 0.10);
+  --rose-border:    rgba(225, 29, 72, 0.28);
+}
+
+.dark {
+  --bg:             #0a0d14;
+  --bg-card:        #121620;
+  --bg-hover:       #19202e;
+  --border:         #212a3b;
+  --text-primary:   #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted:     #64748b;
+  --accent:         #38bdf8;
+  --accent-soft:    #0c2838;
+  --tag-bg:         #171f2e;
+  --tag-text:       #94a3b8;
+  --timeline-line:  #1e293b;
+
+  /* Rich Accent Tokens - Dark */
+  --gold:           #fbbf24;
+  --gold-bg:        rgba(251, 191, 36, 0.12);
+  --gold-border:    rgba(251, 191, 36, 0.32);
+
+  --cyan:           #38bdf8;
+  --cyan-bg:        rgba(56, 189, 248, 0.12);
+  --cyan-border:    rgba(56, 189, 248, 0.32);
+
+  --emerald:        #34d399;
+  --emerald-bg:     rgba(52, 211, 153, 0.12);
+  --emerald-border: rgba(52, 211, 153, 0.32);
+
+  --purple:         #a78bfa;
+  --purple-bg:      rgba(167, 139, 250, 0.12);
+  --purple-border:  rgba(167, 139, 250, 0.32);
+
+  --rose:           #fb7185;
+  --rose-bg:        rgba(251, 113, 133, 0.12);
+  --rose-border:    rgba(251, 113, 133, 0.32);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 85% 15%, rgba(251, 191, 36, 0.05) 0%, transparent 35%);
+  background-repeat: no-repeat;
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+section[id] {
+  scroll-margin-top: 72px;
+}
