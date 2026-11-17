@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Hamza Ben Tekaya — Engineering Portfolio",
   description:
-    "Personal portfolio of Hamza Ben Tekaya — prospective Electrical & Electronic Engineering student, Baccalauréat Technique graduate (Mention Très Bien 17.05/20), and founder of multiple ventures.",
+    "Personal portfolio of Hamza Ben Tekaya — prospective Electrical & Electronic Engineering student, Technical Baccalaureate graduate with Highest Honors (Mention Très Bien, 17.05/20), and founder of multiple ventures.",
   authors: [{ name: "Hamza Ben Tekaya" }],
   keywords: [
     "Hamza Ben Tekaya",

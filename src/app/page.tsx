@@ -24,7 +24,7 @@ function useDarkMode() {
 // teal   → Interests, Creative Media, Fitness
 
 function getTagStyles(label: string): React.CSSProperties {
-  if (/Mention|Baccalauréat|Concours|Kangourou|Très Bien|Pilote|Élites|Preparatoire|Préparatoire|IPEIM|Scholarship|Distinction|Pioneer|STEM|Mathematical/i.test(label)) {
+  if (/Mention|Baccalauréat|Technical Baccalaureate|Concours|Kangourou|Kangaroo|Très Bien|Highest Honors|Pilote|Pioneer|Élites|Preparatoire|Préparatoire|IPEIM|Scholarship|Distinction|STEM|Mathematical/i.test(label)) {
     return { backgroundColor: "var(--amber-bg)", color: "var(--amber)", border: "1px solid var(--amber-border)" };
   }
   if (/Electrical|Electronic|Semiconductor|Microchip|Mechatronic|IoT|Embedded|Arduino|Sensor|Bluetooth|PCB|Logic|Network|Maintenance|R&D|Hardware|Repair|Console|Diagnostics|Python|CAD|SolidWorks|G-Code|Mechanical|Programming|Game Development|Mobile App|GoMyCode|Industrial|Software|Engineering|Technical|BKS|Factory|Intern/i.test(label)) {
@@ -143,7 +143,7 @@ function ThirtySecondModal({ onClose }: { onClose: () => void }) {
   const rows = [
     { label: "Currently", value: "Engineering preparatory student in Tunisia & prospective Electrical & Electronic Engineering candidate." },
     { label: "Exploring", value: "Semiconductors, microchips, mechatronics, and industrial IoT systems." },
-    { label: "Recent highlight", value: "Ranked 285th of 11,350 students nationally (top 2.51%) in the Tunisian Baccalauréat Technique with Mention Très Bien (17.05 / 20)." },
+    { label: "Recent highlight", value: "Ranked 285th of 11,350 students nationally (top 2.51%) in the Tunisian Technical Baccalaureate with Highest Honors (Mention Très Bien, 17.05 / 20)." },
     { label: "Experience", value: "Industrial IoT R&D, hardware repair & custom PC micro-business, commercial brand photography, and e-commerce." },
     { label: "Leadership", value: "Founded F1 Sahel Community (scaled from 2 members to 90-person events) & member of Rotary Sidi Bou Said Le Baron." },
     { label: "Looking for", value: "Top undergraduate engineering programs (NTU Singapore, TUM, ETH Zurich, EPFL) & technical opportunities." },
@@ -171,7 +171,7 @@ function ThirtySecondModal({ onClose }: { onClose: () => void }) {
           <a href="#contact" onClick={onClose} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 20px", borderRadius: 10, backgroundColor: "var(--cobalt)", color: "#fff", fontSize: 13.5, fontWeight: 700, textDecoration: "none" }}>
             Get in touch
           </a>
-          <a href="/cv-hamza-ben-tekaya.pdf" download style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 13.5, fontWeight: 600, color: "var(--text-secondary)", textDecoration: "none" }}>
+          <a href="/cv-hamza-ben-tekaya.pdf" download="Hamza_Ben_Tekaya_CV.pdf" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 13.5, fontWeight: 600, color: "var(--text-secondary)", textDecoration: "none" }}>
             ↓ Download CV · PDF
           </a>
         </div>
@@ -245,7 +245,7 @@ function NavBar() {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {!isMobile && (
             <>
-              <a href="/cv-hamza-ben-tekaya.pdf" download style={{ padding: "7px 15px", borderRadius: 8, fontSize: 12.5, fontWeight: 700, letterSpacing: "0.03em", backgroundColor: "var(--cobalt-bg)", color: "var(--cobalt)", border: "1px solid var(--cobalt-border)", textDecoration: "none", transition: "opacity 0.15s" }}
+              <a href="/cv-hamza-ben-tekaya.pdf" download="Hamza_Ben_Tekaya_CV.pdf" target="_blank" rel="noopener noreferrer" style={{ padding: "7px 15px", borderRadius: 8, fontSize: 12.5, fontWeight: 700, letterSpacing: "0.03em", backgroundColor: "var(--cobalt-bg)", color: "var(--cobalt)", border: "1px solid var(--cobalt-border)", textDecoration: "none", transition: "opacity 0.15s" }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = "0.75")}
                 onMouseLeave={e => (e.currentTarget.style.opacity = "1")}>
                 ↓ Download CV
@@ -288,7 +288,7 @@ function NavBar() {
               </li>
             ))}
             <li style={{ marginTop: 6, display: "flex", gap: 10 }}>
-              <a href="/cv-hamza-ben-tekaya.pdf" download style={{ padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, backgroundColor: "var(--cobalt-bg)", color: "var(--cobalt)", border: "1px solid var(--cobalt-border)", textDecoration: "none" }}>↓ CV</a>
+              <a href="/cv-hamza-ben-tekaya.pdf" download="Hamza_Ben_Tekaya_CV.pdf" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, backgroundColor: "var(--cobalt-bg)", color: "var(--cobalt)", border: "1px solid var(--cobalt-border)", textDecoration: "none" }}>↓ CV</a>
               <a href="#contact" onClick={() => setMenuOpen(false)} style={{ padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, backgroundColor: "var(--amber-bg)", color: "var(--amber)", border: "1px solid var(--amber-border)", textDecoration: "none" }}>Contact</a>
             </li>
           </ul>
@@ -329,7 +329,7 @@ export default function Page() {
                 Prospective{" "}
                 <strong style={{ color: "var(--cobalt)" }}>Electrical &amp; Electronic Engineering</strong>{" "}
                 student specializing in Semiconductors, Microchips &amp; Mechatronics. Graduated with{" "}
-                <strong style={{ color: "var(--amber)" }}>Mention Très Bien (17.05 / 20)</strong> — ranked{" "}
+                <strong style={{ color: "var(--amber)" }}>Highest Honors (Mention Très Bien, 17.05 / 20)</strong> — ranked{" "}
                 <strong style={{ color: "var(--amber)" }}>285th of 11,350</strong> nationally.
               </p>
 
@@ -340,7 +340,7 @@ export default function Page() {
                   onMouseLeave={e => (e.currentTarget.style.opacity = "1")}>
                   Who am I?
                 </a>
-                <a href="/cv-hamza-ben-tekaya.pdf" download style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 22px", borderRadius: 11, fontSize: 14, fontWeight: 700, backgroundColor: "transparent", color: "var(--text-primary)", border: "1.5px solid var(--border)", textDecoration: "none", transition: "border-color 0.15s" }}
+                <a href="/cv-hamza-ben-tekaya.pdf" download="Hamza_Ben_Tekaya_CV.pdf" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 22px", borderRadius: 11, fontSize: 14, fontWeight: 700, backgroundColor: "transparent", color: "var(--text-primary)", border: "1.5px solid var(--border)", textDecoration: "none", transition: "border-color 0.15s" }}
                   onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--cobalt)")}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--border)")}>
                   ↓ Download my CV
@@ -380,7 +380,7 @@ export default function Page() {
           <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
             {[
               { value: "17.05", label: "Bac Score / 20", category: "Academic Distinction", color: "var(--amber)" },
-              { value: "Très Bien", label: "Bac Mention", category: "Academic Distinction", color: "var(--amber)" },
+              { value: "Highest Honors", label: "Baccalaureate Distinction", category: "Academic Distinction", color: "var(--amber)" },
               { value: "C1", label: "English (TOEFL iBT)", category: "Global Engineering", color: "var(--cobalt)" },
               { value: "Sousse", label: "Tunisia", category: "Regional Roots", color: "var(--crimson)" },
             ].map(({ value, label, category, color }) => (
@@ -406,7 +406,7 @@ export default function Page() {
             <div style={{ flex: "1 1 420px" }}>
               <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 16, padding: "28px 30px" }}>
                 <p style={{ fontSize: 15, lineHeight: 1.85, color: "var(--text-secondary)", margin: 0 }}>
-                  Prospective <strong style={{ color: "var(--cobalt)" }}>Electrical &amp; Electronic Engineering</strong> student specializing in Semiconductors, Microchips &amp; Mechatronics. Tunisian Baccalauréat Technique graduate, Mention Très Bien (17.05 / 20). Engineering-minded builder ranked <strong style={{ color: "var(--amber)" }}>285th of 11,350 students nationally (top 2.51%)</strong> in Tunisia&apos;s technical baccalaureate, with a 17.05 average. Designs and builds real systems: an Arduino irrigation controller, repaired phones and laptops, and custom PCs, while also founding a Formula 1 community that grew from 2 members to 90-person events and shooting photography for 3 brands. Combines technical depth with leadership, entrepreneurship, and visual communication. Seeking a place in a top engineering program to turn hands-on problem solving into scalable solutions.
+                  Prospective <strong style={{ color: "var(--cobalt)" }}>Electrical &amp; Electronic Engineering</strong> student specializing in Semiconductors, Microchips &amp; Mechatronics. Tunisian Technical Baccalaureate graduate with Highest Honors (Mention Très Bien, 17.05 / 20). Engineering-minded builder ranked <strong style={{ color: "var(--amber)" }}>285th of 11,350 students nationally (top 2.51%)</strong> in Tunisia&apos;s Technical Baccalaureate, with a 17.05 average. Designs and builds real systems: an Arduino irrigation controller, repaired phones and laptops, and custom PCs, while also founding a Formula 1 community that grew from 2 members to 90-person events and shooting photography for 3 brands. Combines technical depth with leadership, entrepreneurship, and visual communication. Seeking a place in a top engineering program to turn hands-on problem solving into scalable solutions.
                 </p>
               </div>
             </div>
@@ -433,35 +433,35 @@ export default function Page() {
             <TimelineCard
               period="2026"
               title="Technical Baccalaureate Distinction"
-              institution="Lycée Pilote de Sousse — Technical Stream"
+              institution="Sousse Pioneer High School (Lycée Pilote de Sousse) — Technical Stream"
               accentColor="var(--amber)"
-              highlight="285th / 11,350 · Top 2.51% · 17.05 / 20 · Mention Très Bien"
-              description={<>Followed the engineering-focused <strong style={{ color: "var(--amber)" }}>Technical Stream</strong> in high school and graduated in the top 2.51% nationally — 285th of 11,350 students — with an overall average of <strong style={{ color: "var(--amber)" }}>17.05 / 20</strong>, earning the highest distinction: <strong>Mention Très Bien</strong>.</>}
-              tags={["Baccalauréat Technique", "Mention Très Bien", "Top 2.51% National"]}
+              highlight="285th / 11,350 · Top 2.51% · 17.05 / 20 · Highest Honors (Mention Très Bien)"
+              description={<>Followed the engineering-focused <strong style={{ color: "var(--amber)" }}>Technical Stream</strong> in high school and graduated in the top 2.51% nationally — 285th of 11,350 students — with an overall average of <strong style={{ color: "var(--amber)" }}>17.05 / 20</strong>, earning the distinction of <strong>Highest Honors (Mention Très Bien)</strong>.</>}
+              tags={["Technical Baccalaureate", "Highest Honors", "Top 2.51% Nationally"]}
             />
             <TimelineCard
               period="2022 – 2026"
-              title="Pioneer School System — Collège & Lycée Pilote de Sousse"
-              institution="Tunisia's most competitive & selective public school"
+              title="Sousse Pioneer Middle & High School"
+              institution="Tunisia's most competitive & selective public educational system"
               accentColor="var(--amber)"
-              description="Completed both middle and high school in Tunisia's most competitive and selective public educational system — the elite Lycée Pilotes network. Admitted in 2022 via the national Concours Pilote (15.71 / 20)."
-              tags={["Lycée Pilote", "Concours Pilote", "Pioneer School"]}
+              description="Completed both middle and high school in Tunisia's most competitive and selective public educational system — the elite Pioneer Schools network (Lycée Pilote de Sousse). Admitted in 2022 via the national Pioneer Entrance Exam (15.71 / 20)."
+              tags={["Sousse Pioneer High School", "Pioneer Entrance Exam", "Pioneer Schools"]}
             />
             <TimelineCard
               period="End of Primary School"
               title="National Pioneer Entrance Exam"
-              institution="Concours d'admission aux Lycées Pilotes"
+              institution="Competitive National Entrance Exam for Pioneer Schools"
               accentColor="var(--amber)"
-              description="At the end of primary school, took on and passed Tunisia's highly selective national examination assessing academic excellence, earning admission to the Lycée Pilote de Sousse network."
-              tags={["Concours Pilote", "National Exam", "Distinction"]}
+              description="At the end of primary school, took on and passed Tunisia's highly selective national examination assessing academic excellence, earning admission to the Sousse Pioneer School network."
+              tags={["Pioneer Entrance Exam", "National Exam", "Academic Distinction"]}
             />
             <TimelineCard
               period="Grades 6 & 7"
               title="Early STEM & Mathematical Foundations"
-              institution="Concours Kangourou Mathematics Contest"
+              institution="Kangaroo Mathematics Competition"
               accentColor="var(--amber)"
-              description="Passionate about science and mathematics from an early age. Competed in the international Concours Kangourou Mathematics Contest in both grades 6 and 7."
-              tags={["Concours Kangourou", "Mathematics", "STEM", "Mathematical Foundations"]}
+              description="Passionate about science and mathematics from an early age. Competed in the international Kangaroo Mathematics Competition in both grades 6 and 7."
+              tags={["Kangaroo Mathematics Competition", "Mathematics", "STEM", "Mathematical Foundations"]}
             />
           </div>
         </section>
@@ -505,7 +505,7 @@ export default function Page() {
               accentColor="var(--teal)"
               link="https://www.instagram.com/7amza_bt_photography/"
               linkLabel="@7amza_bt_photography on Instagram"
-              description={<>Active photographer shooting with a <strong>Canon EOS 250D</strong>, editing in Adobe Lightroom. Covered major events at Lycée Pilote de Sousse and produced commercial photography for <strong>3 clothing brands</strong>.</>}
+              description={<>Active photographer shooting with a <strong>Canon EOS 250D</strong>, editing in Adobe Lightroom. Covered major events at Sousse Pioneer High School and produced commercial photography for <strong>3 clothing brands</strong>.</>}
               tags={["Photography", "Adobe Lightroom", "Canon EOS 250D", "Commercial", "Brand Visuals"]}
             />
             <TimelineCard
@@ -534,7 +534,7 @@ export default function Page() {
             <div style={{ borderLeft: "1.5px solid var(--cobalt-border)", marginLeft: 5 }}>
               <TimelineCard
                 period="2024"
-                title="Automated Smart Irrigation System — Arrosoir Automatique"
+                title="Automated Smart Irrigation System"
                 institution="High School Engineering Project"
                 accentColor="var(--cobalt)"
                 description={<>Designed and built a smart irrigation system using an <strong style={{ color: "var(--cobalt)" }}>Arduino microcontroller</strong>, temperature and humidity sensors, and a <strong style={{ color: "var(--cobalt)" }}>Bluetooth module</strong> for remote smartphone control. Implemented automated watering logic based on live sensor readings.</>}
@@ -577,8 +577,8 @@ export default function Page() {
               />
               <TimelineCard
                 period="2 Years"
-                title="Media Head — Art Club, Lycée Pilote de Sousse"
-                institution="Lycée Pilote de Sousse"
+                title="Media Head — Art Club, Sousse Pioneer High School"
+                institution="Sousse Pioneer High School"
                 accentColor="var(--crimson)"
                 description="Led the media and visual communications arm of the school's Art Club for 2 years, overseeing photography, visual content, and event coverage for school exhibitions and activities."
                 tags={["Leadership", "Photography", "Media", "Art Club", "Visual Communication"]}
@@ -656,16 +656,16 @@ export default function Page() {
               {
                 period: "2015 – 2019",
                 title: "Painting & Fine Arts",
-                desc: "Attended a painting club for 3 years. Paintings exhibited at both middle school and lycée exhibitions.",
+                desc: "Attended a painting club for 3 years. Paintings exhibited at both middle school and high school exhibitions.",
                 color: "var(--teal)",
                 tags: ["Fine Arts", "Painting", "Sketching"],
               },
               {
                 period: "Primary School",
-                title: "Gymnastics, LEGO Technic & Concours Kangourou",
-                desc: "Practiced gymnastics, built LEGO Technic sets obsessively, and competed in the international Kangourou Mathematics Contest.",
+                title: "Gymnastics, LEGO Technic & Kangaroo Mathematics Competition",
+                desc: "Practiced gymnastics, built LEGO Technic sets obsessively, and competed in the international Kangaroo Mathematics Competition.",
                 color: "var(--amber)",
-                tags: ["Gymnastics", "LEGO Technic", "Concours Kangourou", "Mathematical Foundations"],
+                tags: ["Gymnastics", "LEGO Technic", "Kangaroo Mathematics Competition", "Mathematical Foundations"],
               },
             ].map(({ period, title, desc, color, tags }) => (
               <div key={title} style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 16, padding: "22px 24px", position: "relative", overflow: "hidden" }}>
@@ -733,7 +733,7 @@ export default function Page() {
                 <span style={{ width: 28, height: 28, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--cobalt-bg)", color: "var(--cobalt)", fontSize: 14 }}>↓</span>
                 <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--cobalt)" }}>Curriculum Vitae</span>
               </div>
-              <a href="/cv-hamza-ben-tekaya.pdf" download style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, backgroundColor: "var(--cobalt)", color: "#fff", fontSize: 13.5, fontWeight: 700, textDecoration: "none" }}
+              <a href="/cv-hamza-ben-tekaya.pdf" download="Hamza_Ben_Tekaya_CV.pdf" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, backgroundColor: "var(--cobalt)", color: "#fff", fontSize: 13.5, fontWeight: 700, textDecoration: "none" }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
                 onMouseLeave={e => (e.currentTarget.style.opacity = "1")}>
                 ↓ Download CV · PDF
