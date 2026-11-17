@@ -32,6 +32,14 @@
   --teal:           #0D9488;
   --teal-bg:        rgba(13, 148, 136, 0.08);
   --teal-border:    rgba(13, 148, 136, 0.22);
+
+  /* World Atlas Tokens — Light */
+  --map-ocean:          #F8FAFC;
+  --map-land:           #CBD5E1;
+  --map-land-border:    #FFFFFF;
+  --map-visited-land:   #BAE6FD;
+  --map-visited-border: #38BDF8;
+  --map-grid:           rgba(148, 163, 184, 0.25);
 }
 
 .dark {
@@ -64,6 +72,14 @@
   --teal:           #2DD4BF;
   --teal-bg:        rgba(45, 212, 191, 0.12);
   --teal-border:    rgba(45, 212, 191, 0.28);
+
+  /* World Atlas Tokens — Dark */
+  --map-ocean:          #080C14;
+  --map-land:           #1E293B;
+  --map-land-border:    #0F172A;
+  --map-visited-land:   #0C4A6E;
+  --map-visited-border: #0284C7;
+  --map-grid:           rgba(51, 65, 85, 0.35);
 }
 
 *,

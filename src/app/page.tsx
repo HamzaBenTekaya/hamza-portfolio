@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import WorldAtlas from "./components/WorldAtlas";
 
 // ─── Dark-mode toggle hook ─────────────────────────────────────────────────
 function useDarkMode() {
@@ -679,24 +680,8 @@ export default function Page() {
           </div>
 
           {/* World Atlas */}
-          <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
-            <div style={{ padding: "22px 26px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", justifyContent: "space-between" }}>
-              <div>
-                <EyebrowLabel color="var(--cobalt)">Personal World Atlas</EyebrowLabel>
-                <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 2 }}>Countries visited — from Sousse to the world</p>
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--crimson)", fontWeight: 600 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "var(--crimson)", boxShadow: "0 0 6px var(--crimson)" }} />
-                  Home base
-                </span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--cobalt)", fontWeight: 600 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "var(--cobalt)", boxShadow: "0 0 6px var(--cobalt)" }} />
-                  Visited
-                </span>
-              </div>
-            </div>
-            <WorldAtlasMap />
+          <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 20, overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,0.03)" }}>
+            <WorldAtlas />
           </div>
         </section>
 
@@ -782,111 +767,5 @@ export default function Page() {
         </div>
       </footer>
     </>
-  );
-}
-
-// ─── World Atlas Map (pure SVG, equirectangular projection) ───────────────
-type CountryPin = {
-  name: string;
-  lat: number;
-  lng: number;
-  note: string;
-  isHome?: boolean;
-};
-
-const PINS: CountryPin[] = [
-  { name: "Tunisia", lat: 34, lng: 9, note: "Starting point — Sousse, Tunisia · Home base", isHome: true },
-  { name: "Spain", lat: 40, lng: -4, note: "Europe · Visited" },
-  { name: "Germany", lat: 51, lng: 10, note: "Europe · Visited" },
-  { name: "Netherlands", lat: 52, lng: 5, note: "Europe · Visited" },
-  { name: "United Kingdom", lat: 54, lng: -2, note: "Europe · Visited" },
-  { name: "Turkey", lat: 39, lng: 35, note: "Eurasia · Visited" },
-  { name: "Saudi Arabia", lat: 25, lng: 45, note: "Middle East · Visited" },
-];
-
-function latLngToXY(lat: number, lng: number, width: number, height: number): [number, number] {
-  const x = ((lng + 180) / 360) * width;
-  const y = ((90 - lat) / 180) * height;
-  return [x, y];
-}
-
-function WorldAtlasMap() {
-  const [active, setActive] = useState<CountryPin | null>(null);
-  const W = 800;
-  const H = 400;
-
-  return (
-    <div style={{ padding: "0 0 24px" }}>
-      <div style={{ position: "relative", width: "100%", overflowX: "auto" }}>
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", display: "block", backgroundColor: "var(--bg)" }} aria-label="World map showing visited countries">
-          {/* Ocean */}
-          <rect width={W} height={H} fill="var(--bg)" />
-
-          {/* Simplified continent outlines — equirectangular approximate paths */}
-          {/* North America */}
-          <path d="M80,60 L180,55 L200,110 L190,180 L150,220 L100,210 L70,160 L60,100 Z" fill="var(--border)" stroke="var(--bg-card)" strokeWidth="0.8" opacity="0.7" />
-          {/* South America */}
-          <path d="M140,230 L195,220 L210,260 L220,340 L180,380 L140,370 L120,310 L115,260 Z" fill="var(--border)" stroke="var(--bg-card)" strokeWidth="0.8" opacity="0.7" />
-          {/* Europe */}
-          <path d="M360,50 L430,45 L445,70 L440,100 L410,110 L380,100 L360,80 Z" fill="var(--border)" stroke="var(--bg-card)" strokeWidth="0.8" opacity="0.7" />
-          {/* Africa */}
-          <path d="M360,120 L440,115 L465,160 L470,250 L440,330 L400,360 L365,340 L340,270 L335,180 Z" fill="var(--border)" stroke="var(--bg-card)" strokeWidth="0.8" opacity="0.7" />
-          {/* Asia */}
-          <path d="M440,45 L620,40 L660,80 L680,140 L650,180 L580,190 L500,160 L450,130 L440,90 Z" fill="var(--border)" stroke="var(--bg-card)" strokeWidth="0.8" opacity="0.7" />
-          {/* Middle East */}
-          <path d="M460,120 L530,115 L540,170 L500,180 L455,165 Z" fill="var(--border)" stroke="var(--bg-card)" strokeWidth="0.8" opacity="0.7" />
-          {/* Australia */}
-          <path d="M600,240 L680,235 L700,280 L690,320 L640,330 L590,300 L580,265 Z" fill="var(--border)" stroke="var(--bg-card)" strokeWidth="0.8" opacity="0.7" />
-
-          {/* Graticule lines */}
-          {[-60, -30, 0, 30, 60].map(lat => {
-            const y = ((90 - lat) / 180) * H;
-            return <line key={lat} x1={0} y1={y} x2={W} y2={y} stroke="var(--border)" strokeWidth="0.4" opacity="0.4" />;
-          })}
-          {[-120, -60, 0, 60, 120].map(lng => {
-            const x = ((lng + 180) / 360) * W;
-            return <line key={lng} x1={x} y1={0} x2={x} y2={H} stroke="var(--border)" strokeWidth="0.4" opacity="0.4" />;
-          })}
-
-          {/* Pins */}
-          {PINS.map(pin => {
-            const [x, y] = latLngToXY(pin.lat, pin.lng, W, H);
-            const isActive = active?.name === pin.name;
-            const color = pin.isHome ? "var(--crimson)" : "var(--cobalt)";
-            return (
-              <g key={pin.name} onClick={() => setActive(isActive ? null : pin)} style={{ cursor: "pointer" }}>
-                <circle cx={x} cy={y} r={isActive ? 14 : 10} fill={color} opacity={0.15} />
-                <circle cx={x} cy={y} r={isActive ? 7 : 5} fill={color} />
-                <circle cx={x} cy={y} r={isActive ? 9 : 7} fill="none" stroke={color} strokeWidth={1.5} opacity={0.6} />
-                {/* Label */}
-                <text x={x + 10} y={y + 4} fontSize="9" fill={color} fontWeight="700" style={{ pointerEvents: "none" }}>{pin.name}</text>
-              </g>
-            );
-          })}
-        </svg>
-      </div>
-
-      {/* Detail card */}
-      {active && (
-        <div style={{ margin: "0 24px", padding: "16px 20px", backgroundColor: "var(--bg-card)", border: `1px solid ${active.isHome ? "var(--crimson-border)" : "var(--cobalt-border)"}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-          <div>
-            <p style={{ margin: 0, fontWeight: 700, fontSize: 15, color: "var(--text-primary)" }}>{active.name}</p>
-            <p style={{ margin: 0, marginTop: 4, fontSize: 13, color: "var(--text-secondary)" }}>{active.note}</p>
-          </div>
-          <button onClick={() => setActive(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", fontSize: 18, lineHeight: 1, padding: "4px 8px", fontFamily: "inherit" }}>✕</button>
-        </div>
-      )}
-
-      {/* Country list */}
-      <div style={{ padding: "16px 24px 0", display: "flex", flexWrap: "wrap", gap: 10 }}>
-        {PINS.map(pin => (
-          <button key={pin.name} onClick={() => setActive(active?.name === pin.name ? null : pin)}
-            style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "5px 12px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer", border: `1px solid ${active?.name === pin.name ? (pin.isHome ? "var(--crimson-border)" : "var(--cobalt-border)") : "var(--border)"}`, backgroundColor: active?.name === pin.name ? (pin.isHome ? "var(--crimson-bg)" : "var(--cobalt-bg)") : "var(--bg-card)", color: active?.name === pin.name ? (pin.isHome ? "var(--crimson)" : "var(--cobalt)") : "var(--text-secondary)", fontFamily: "inherit" }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: pin.isHome ? "var(--crimson)" : "var(--cobalt)" }} />
-            {pin.name}
-          </button>
-        ))}
-      </div>
-    </div>
   );
 }
