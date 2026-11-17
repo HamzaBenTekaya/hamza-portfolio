@@ -5,7 +5,7 @@ import { geoEqualEarth, geoPath, geoGraticule10 } from "d3-geo";
 import { feature } from "topojson-client";
 import type { Topology, Objects } from "topojson-specification";
 import type { FeatureCollection, Geometry } from "geojson";
-import worldDataRaw from "world-atlas/countries-110m.json";
+import worldDataRaw from "world-atlas/countries-50m.json";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 export interface AtlasPlace {
@@ -21,7 +21,7 @@ export interface AtlasPlace {
   zoomScale: number;
 }
 
-// ─── 7 Editorial Places ───────────────────────────────────────────────────
+// ─── 7 Editorial Places with High-Separation Zoom Scales ───────────────────
 export const PLACES: AtlasPlace[] = [
   {
     id: "788",
@@ -34,7 +34,7 @@ export const PLACES: AtlasPlace[] = [
     subtitle: "Home base in North Africa — Sousse, Tunisia",
     description:
       "Birthplace and home base in Sousse, on the Mediterranean coast of Tunisia. The foundation of my engineering curiosity, community leadership, and academic path.",
-    zoomScale: 2.8,
+    zoomScale: 4.2,
   },
   {
     id: "724",
@@ -46,19 +46,19 @@ export const PLACES: AtlasPlace[] = [
     subtitle: "A country I have visited in Europe",
     description:
       "Explored Mediterranean culture, architecture, and historic cities across the Iberian Peninsula.",
-    zoomScale: 2.6,
+    zoomScale: 4.2,
   },
   {
     id: "276",
     name: "Germany",
     countryName: "Germany",
     region: "Europe · Visited",
-    coords: [10.4515, 51.1657], // Berlin / Munich
+    coords: [10.4515, 51.1657], // Central Germany / Berlin
     coordinatesDisplay: "51.17° N / 10.45° E",
     subtitle: "A country I have visited in Europe",
     description:
       "Visited central European engineering and cultural hubs; certified in German (ÖSD) and preparing for prospective study and research.",
-    zoomScale: 2.8,
+    zoomScale: 5.0,
   },
   {
     id: "528",
@@ -69,8 +69,8 @@ export const PLACES: AtlasPlace[] = [
     coordinatesDisplay: "52.13° N / 5.29° E",
     subtitle: "A country I have visited in Europe",
     description:
-      "Experienced pioneering urban design, sustainable infrastructure, and maritime engineering heritage.",
-    zoomScale: 3.2,
+      "Experienced pioneering urban design, sustainable infrastructure, and maritime engineering heritage with distinct visual separation.",
+    zoomScale: 6.8, // Deep magnification for crisp North Sea separation from UK & Germany
   },
   {
     id: "826",
@@ -82,7 +82,7 @@ export const PLACES: AtlasPlace[] = [
     subtitle: "A country I have visited in Europe",
     description:
       "Explored global technological, academic, and cultural landmarks across Great Britain.",
-    zoomScale: 2.8,
+    zoomScale: 5.2,
   },
   {
     id: "792",
@@ -94,7 +94,7 @@ export const PLACES: AtlasPlace[] = [
     subtitle: "A country I have visited in Eurasia",
     description:
       "Explored the historic crossroads of Europe and Asia across Istanbul, the Bosphorus Strait, and Anatolia.",
-    zoomScale: 2.6,
+    zoomScale: 4.0,
   },
   {
     id: "682",
@@ -105,8 +105,8 @@ export const PLACES: AtlasPlace[] = [
     coordinatesDisplay: "23.89° N / 45.08° E",
     subtitle: "A country I have visited in the Middle East",
     description:
-      "Traveled across the Arabian Peninsula, visiting Riyadh, Jeddah, and holy landmarks.",
-    zoomScale: 2.4,
+      "Traveled across the Arabian Peninsula, visiting key historic landmarks, coastal Jeddah, and modern hubs.",
+    zoomScale: 3.4,
   },
 ];
 
@@ -116,8 +116,9 @@ const H = 460;
 export default function WorldAtlas() {
   const [selectedPlace, setSelectedPlace] = useState<AtlasPlace | null>(null);
   const [hoveredPlaceId, setHoveredPlaceId] = useState<string | null>(null);
+  const [cursorTooltip, setCursorTooltip] = useState<{ name: string; isVisited: boolean } | null>(null);
 
-  // ─── Generate Real Geo Projections & Paths ──────────────────────────────
+  // ─── Generate Real Geo Projections & Paths from countries-50m ───────────
   const { countriesList, graticulePath, projection } = useMemo(() => {
     const topology = worldDataRaw as unknown as Topology<Objects>;
     const featureCollection = feature(
@@ -135,7 +136,7 @@ export default function WorldAtlas() {
       features: filteredFeatures,
     };
 
-    // Fit equal earth projection nicely to 900x460
+    // Fit equal earth projection nicely to 900x460 canvas
     const proj = geoEqualEarth().fitExtent(
       [
         [10, 16],
@@ -200,10 +201,28 @@ export default function WorldAtlas() {
   const handleReset = () => {
     setSelectedPlace(null);
     setHoveredPlaceId(null);
+    setCursorTooltip(null);
   };
 
-  // Active or hovered place for floating pill / detail card
+  // Step through places (Previous / Next)
   const activePlace = selectedPlace ?? pinPositions.find((p) => p.id === hoveredPlaceId) ?? null;
+  const currentPlaceIndex = selectedPlace ? PLACES.findIndex((p) => p.id === selectedPlace.id) : -1;
+
+  const handlePrevPlace = () => {
+    const prevIdx = currentPlaceIndex <= 0 ? PLACES.length - 1 : currentPlaceIndex - 1;
+    setSelectedPlace(PLACES[prevIdx]);
+  };
+
+  const handleNextPlace = () => {
+    const nextIdx = currentPlaceIndex === -1 || currentPlaceIndex === PLACES.length - 1 ? 0 : currentPlaceIndex + 1;
+    setSelectedPlace(PLACES[nextIdx]);
+  };
+
+  // Dynamic pin scaling: scale pins down proportionally when zoomed in so London, Amsterdam, Berlin never overlap
+  const currentScale = selectedPlace ? selectedPlace.zoomScale : 1;
+  const pinRadius = selectedPlace ? Math.max(1.7, 5.5 / Math.sqrt(currentScale)) : 5.2;
+
+  const isExpandedStage = selectedPlace !== null;
 
   return (
     <div style={{ padding: "0 0 10px" }}>
@@ -301,23 +320,97 @@ export default function WorldAtlas() {
         </div>
       </div>
 
-      {/* ── Two-Column Layout: Main SVG Map (74%) + Sidebar (26%) ── */}
+      {/* ── Compact Horizontal Pill Bar (Visible when in Expanded Focus Stage) ── */}
+      {isExpandedStage && (
+        <div
+          style={{
+            padding: "12px 20px",
+            backgroundColor: "var(--bg-card)",
+            borderBottom: "1px solid var(--border)",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            overflowX: "auto",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "var(--text-muted)",
+              marginRight: 4,
+              flexShrink: 0,
+            }}
+          >
+            The Places:
+          </span>
+          {PLACES.map((place) => {
+            const isSelected = selectedPlace?.id === place.id;
+            const accent = place.isHome ? "var(--crimson)" : "var(--cobalt)";
+            return (
+              <button
+                key={place.id}
+                onClick={() => setSelectedPlace(place)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 7,
+                  padding: "6px 14px",
+                  borderRadius: 999,
+                  fontSize: 12,
+                  fontWeight: isSelected ? 700 : 600,
+                  border: `1px solid ${isSelected ? accent : "var(--border)"}`,
+                  backgroundColor: isSelected
+                    ? place.isHome
+                      ? "var(--crimson-bg)"
+                      : "var(--cobalt-bg)"
+                    : "var(--bg)",
+                  color: isSelected ? accent : "var(--text-primary)",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                  transition: "all 0.15s ease",
+                  fontFamily: "inherit",
+                }}
+              >
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    backgroundColor: accent,
+                  }}
+                />
+                {place.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── Main Map Canvas + Sidebar Layout ── */}
       <div
         style={{
           display: "flex",
           flexWrap: "wrap",
           borderBottom: "1px solid var(--border)",
+          transition: "all 0.4s ease",
         }}
       >
-        {/* Main Map Canvas Area */}
+        {/* Main Map Viewport Stage */}
         <div
           style={{
-            flex: "1 1 560px",
+            flex: isExpandedStage ? "1 1 100%" : "1 1 68%",
+            width: isExpandedStage ? "100%" : undefined,
             position: "relative",
-            minHeight: 380,
+            minHeight: isExpandedStage ? 620 : 480,
             backgroundColor: "var(--map-ocean, #F8FAFC)",
             overflow: "hidden",
-            borderRight: "1px solid var(--border)",
+            borderRight: isExpandedStage ? "none" : "1px solid var(--border)",
+            transition: "min-height 0.45s ease, flex 0.45s ease",
           }}
         >
           {/* Top-Left Status Pill */}
@@ -330,11 +423,11 @@ export default function WorldAtlas() {
               display: "inline-flex",
               alignItems: "center",
               gap: 7,
-              padding: "5px 12px",
+              padding: "6px 14px",
               borderRadius: 999,
               backgroundColor: "var(--bg-card)",
               border: "1px solid var(--border)",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
               fontSize: 12,
               fontWeight: 600,
               color: "var(--text-primary)",
@@ -346,13 +439,17 @@ export default function WorldAtlas() {
                 width: 6,
                 height: 6,
                 borderRadius: "50%",
-                backgroundColor: selectedPlace ? (selectedPlace.isHome ? "var(--crimson)" : "var(--cobalt)") : "var(--text-muted)",
+                backgroundColor: selectedPlace
+                  ? selectedPlace.isHome
+                    ? "var(--crimson)"
+                    : "var(--cobalt)"
+                  : "var(--text-muted)",
               }}
             />
-            {selectedPlace ? `${selectedPlace.name} · ${selectedPlace.region}` : "World View · Click a Country"}
+            {selectedPlace ? `${selectedPlace.name} · ${selectedPlace.region}` : (cursorTooltip ? cursorTooltip.name : "World View · Click Any Country")}
           </div>
 
-          {/* Top-Right "World ↗" Reset Button */}
+          {/* Prominent "Reset / World View ↗" Button */}
           {selectedPlace && (
             <button
               onClick={handleReset}
@@ -364,38 +461,39 @@ export default function WorldAtlas() {
                 zIndex: 10,
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 6,
-                padding: "6px 14px",
+                gap: 7,
+                padding: "8px 18px",
                 borderRadius: 999,
-                backgroundColor: "var(--cobalt-bg)",
-                color: "var(--cobalt)",
-                border: "1px solid var(--cobalt-border)",
-                fontSize: 12,
+                backgroundColor: "var(--cobalt)",
+                color: "#FFFFFF",
+                border: "none",
+                fontSize: 12.5,
                 fontWeight: 700,
                 cursor: "pointer",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                boxShadow: "0 4px 16px rgba(2, 132, 199, 0.35)",
                 transition: "all 0.15s ease",
                 fontFamily: "inherit",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "var(--cobalt)";
-                e.currentTarget.style.color = "#FFFFFF";
+                e.currentTarget.style.opacity = "0.9";
+                e.currentTarget.style.transform = "translateY(-1px)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "var(--cobalt-bg)";
-                e.currentTarget.style.color = "var(--cobalt)";
+                e.currentTarget.style.opacity = "1";
+                e.currentTarget.style.transform = "translateY(0)";
               }}
             >
-              World ↗
+              Reset / World View ↗
             </button>
           )}
 
-          {/* Interactive SVG World Map */}
+          {/* Interactive SVG World Map with 50m High Resolution */}
           <svg
             viewBox={`0 0 ${W} ${H}`}
             style={{
               width: "100%",
-              height: "auto",
+              height: "100%",
+              minHeight: isExpandedStage ? 620 : 480,
               display: "block",
               userSelect: "none",
             }}
@@ -442,35 +540,36 @@ export default function WorldAtlas() {
                 />
               )}
 
-              {/* All Real World Countries (110m resolution) */}
+              {/* All Real World Countries (50m High Resolution) */}
               <g id="world-polygons">
                 {countriesList.map((country) => {
                   const place = visitedMap.get(country.id);
                   const isSelected = selectedPlace?.id === country.id;
                   const isHovered = hoveredPlaceId === country.id;
 
-                  // Dynamic color styling
+                  // High-contrast clean polygon styling
                   let fill = "var(--map-land, #CBD5E1)";
                   let stroke = "var(--map-land-border, #FFFFFF)";
                   let strokeWidth = "0.5";
-                  let cursor = "default";
 
                   if (place) {
-                    cursor = "pointer";
                     if (isSelected) {
                       fill = place.isHome ? "var(--crimson)" : "var(--cobalt)";
                       stroke = "#FFFFFF";
-                      strokeWidth = "1.5";
+                      strokeWidth = "1.2";
                     } else if (isHovered) {
                       fill = place.isHome ? "var(--crimson-bg)" : "var(--cobalt-bg)";
                       stroke = place.isHome ? "var(--crimson)" : "var(--cobalt)";
-                      strokeWidth = "1.2";
+                      strokeWidth = "1.0";
                     } else {
                       // Visited unselected
                       fill = place.isHome ? "var(--crimson-bg)" : "var(--map-visited-land, #BAE6FD)";
                       stroke = place.isHome ? "var(--crimson-border)" : "var(--map-visited-border, #38BDF8)";
-                      strokeWidth = "0.8";
+                      strokeWidth = "0.7";
                     }
+                  } else if (cursorTooltip?.name === country.name) {
+                    // Unvisited country hover highlight
+                    fill = "var(--border)";
                   }
 
                   return (
@@ -481,7 +580,7 @@ export default function WorldAtlas() {
                       stroke={stroke}
                       strokeWidth={strokeWidth}
                       style={{
-                        cursor,
+                        cursor: "pointer",
                         transition: "fill 0.2s ease, stroke 0.2s ease",
                       }}
                       onClick={() => {
@@ -494,9 +593,11 @@ export default function WorldAtlas() {
                         }
                       }}
                       onMouseEnter={() => {
+                        setCursorTooltip({ name: country.name, isVisited: Boolean(place) });
                         if (place) setHoveredPlaceId(place.id);
                       }}
                       onMouseLeave={() => {
+                        setCursorTooltip(null);
                         if (place && hoveredPlaceId === place.id) setHoveredPlaceId(null);
                       }}
                     >
@@ -506,7 +607,7 @@ export default function WorldAtlas() {
                 })}
               </g>
 
-              {/* Geographic Pins for the 7 Places */}
+              {/* Scaled Pins for the 7 Places */}
               <g id="atlas-pins">
                 {pinPositions.map((pin) => {
                   const isSelected = selectedPlace?.id === pin.id;
@@ -517,9 +618,11 @@ export default function WorldAtlas() {
                   const showLabel =
                     isSelected ||
                     isHovered ||
-                    (pin.isHome && (!selectedPlace || selectedPlace.id === pin.id));
+                    (pin.isHome && !selectedPlace);
 
-                  const pinRadius = selectedPlace ? 4 : 5;
+                  // Dynamic sizing to prevent overlaps
+                  const outerRadius = isSelected ? pinRadius * 2.8 : pinRadius * 2.1;
+                  const ringRadius = pinRadius * 1.5;
 
                   return (
                     <g
@@ -533,16 +636,20 @@ export default function WorldAtlas() {
                           setSelectedPlace(pin);
                         }
                       }}
-                      onMouseEnter={() => setHoveredPlaceId(pin.id)}
+                      onMouseEnter={() => {
+                        setHoveredPlaceId(pin.id);
+                        setCursorTooltip({ name: pin.name, isVisited: true });
+                      }}
                       onMouseLeave={() => {
                         if (hoveredPlaceId === pin.id) setHoveredPlaceId(null);
+                        setCursorTooltip(null);
                       }}
                     >
                       {/* Outer pulse / glow ring */}
                       <circle
                         cx={pin.x}
                         cy={pin.y}
-                        r={isSelected ? 14 : isHovered ? 12 : 9}
+                        r={outerRadius}
                         fill={color}
                         opacity={isSelected ? 0.35 : 0.18}
                       />
@@ -551,10 +658,10 @@ export default function WorldAtlas() {
                       <circle
                         cx={pin.x}
                         cy={pin.y}
-                        r={pinRadius + 2.5}
+                        r={ringRadius}
                         fill="none"
                         stroke={color}
-                        strokeWidth={isSelected ? 2 : 1.2}
+                        strokeWidth={isSelected ? 1.5 : 1.0}
                       />
 
                       {/* Center dot pin */}
@@ -564,7 +671,7 @@ export default function WorldAtlas() {
                         r={pinRadius}
                         fill={isSelected ? "#FFFFFF" : color}
                         stroke={isSelected ? color : "#FFFFFF"}
-                        strokeWidth="1.2"
+                        strokeWidth={0.8}
                       />
 
                       {/* Floating Label Pill (Avoids crowding across Europe) */}
@@ -572,30 +679,30 @@ export default function WorldAtlas() {
                         <g style={{ pointerEvents: "none" }}>
                           {/* Label Box Background */}
                           <rect
-                            x={pin.x + 9}
-                            y={pin.y - 12}
-                            width={pin.name.length * 6.5 + 16}
-                            height={18}
-                            rx={9}
+                            x={pin.x + pinRadius * 2}
+                            y={pin.y - 10 / Math.sqrt(currentScale)}
+                            width={pin.name.length * (5.8 / Math.sqrt(currentScale)) + 14 / Math.sqrt(currentScale)}
+                            height={15 / Math.sqrt(currentScale)}
+                            rx={7.5 / Math.sqrt(currentScale)}
                             fill="var(--bg-card)"
                             stroke={isSelected ? color : "var(--border)"}
-                            strokeWidth={isSelected ? 1.5 : 1}
+                            strokeWidth={isSelected ? 1.2 : 0.8}
                             style={{
                               filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.12))",
                             }}
                           />
                           {/* Indicator mini dot */}
                           <circle
-                            cx={pin.x + 16}
-                            cy={pin.y - 3}
-                            r={2.5}
+                            cx={pin.x + pinRadius * 2 + 5 / Math.sqrt(currentScale)}
+                            cy={pin.y - 2.5 / Math.sqrt(currentScale)}
+                            r={2 / Math.sqrt(currentScale)}
                             fill={color}
                           />
                           {/* Label Text */}
                           <text
-                            x={pin.x + 22}
-                            y={pin.y + 0.5}
-                            fontSize="9"
+                            x={pin.x + pinRadius * 2 + 9 / Math.sqrt(currentScale)}
+                            y={pin.y - 1.5 / Math.sqrt(currentScale)}
+                            fontSize={7.8 / Math.sqrt(currentScale)}
                             fontWeight="700"
                             letterSpacing="0.02em"
                             fill="var(--text-primary)"
@@ -613,162 +720,152 @@ export default function WorldAtlas() {
           </svg>
         </div>
 
-        {/* Right Sidebar: "THE PLACES" (26% width) */}
-        <div
-          style={{
-            flex: "1 1 240px",
-            padding: "20px 20px 16px",
-            backgroundColor: "var(--bg-card)",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          {/* Header */}
+        {/* Right Sidebar: "THE PLACES" (Hidden when in expanded global focus stage) */}
+        {!isExpandedStage && (
           <div
             style={{
-              paddingBottom: 12,
-              marginBottom: 10,
-              borderBottom: "1px solid var(--border)",
+              flex: "1 1 240px",
+              padding: "24px 22px 20px",
+              backgroundColor: "var(--bg-card)",
               display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
+              flexDirection: "column",
             }}
           >
-            <span
+            {/* Header */}
+            <div
               style={{
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: "var(--text-muted)",
+                paddingBottom: 14,
+                marginBottom: 12,
+                borderBottom: "1px solid var(--border)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
               }}
             >
-              The Places
-            </span>
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                color: "var(--text-secondary)",
-              }}
-            >
-              7 countries
-            </span>
-          </div>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "var(--text-muted)",
+                }}
+              >
+                The Places
+              </span>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: "var(--text-secondary)",
+                }}
+              >
+                7 countries
+              </span>
+            </div>
 
-          {/* Clickable Country List (Strict rule: NO item numbers) */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {PLACES.map((place) => {
-              const isSelected = selectedPlace?.id === place.id;
-              const isHovered = hoveredPlaceId === place.id;
-              const accent = place.isHome ? "var(--crimson)" : "var(--cobalt)";
+            {/* Clickable Country List (Strict rule: NO item numbers) */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+              {PLACES.map((place) => {
+                const isHovered = hoveredPlaceId === place.id;
+                const accent = place.isHome ? "var(--crimson)" : "var(--cobalt)";
 
-              return (
-                <button
-                  key={place.id}
-                  onClick={() => {
-                    if (selectedPlace?.id === place.id) {
-                      handleReset();
-                    } else {
+                return (
+                  <button
+                    key={place.id}
+                    onClick={() => {
                       setSelectedPlace(place);
-                    }
-                  }}
-                  onMouseEnter={() => setHoveredPlaceId(place.id)}
-                  onMouseLeave={() => {
-                    if (hoveredPlaceId === place.id) setHoveredPlaceId(null);
-                  }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "9px 12px",
-                    borderRadius: 10,
-                    border: `1px solid ${
-                      isSelected
-                        ? accent
-                        : isHovered
-                        ? "var(--border)"
-                        : "transparent"
-                    }`,
-                    backgroundColor: isSelected
-                      ? place.isHome
-                        ? "var(--crimson-bg)"
-                        : "var(--cobalt-bg)"
-                      : isHovered
-                      ? "var(--bg-hover, var(--tag-bg))"
-                      : "transparent",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    transition: "all 0.15s ease",
-                    fontFamily: "inherit",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                    <span
-                      style={{
-                        width: 7,
-                        height: 7,
-                        borderRadius: "50%",
-                        backgroundColor: accent,
-                        boxShadow: isSelected ? `0 0 6px ${accent}` : "none",
-                        flexShrink: 0,
-                      }}
-                    />
-                    <div>
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: 13.5,
-                          fontWeight: isSelected ? 700 : 600,
-                          color: isSelected ? accent : "var(--text-primary)",
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        {place.name}
-                      </p>
-                      <p
-                        style={{
-                          margin: "2px 0 0",
-                          fontSize: 11,
-                          color: "var(--text-muted)",
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        {place.isHome ? "Home Base · Tunisia" : place.region.replace(" · Visited", "")}
-                      </p>
-                    </div>
-                  </div>
-
-                  <span
+                    }}
+                    onMouseEnter={() => setHoveredPlaceId(place.id)}
+                    onMouseLeave={() => {
+                      if (hoveredPlaceId === place.id) setHoveredPlaceId(null);
+                    }}
                     style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: isSelected ? accent : "var(--text-muted)",
-                      opacity: isSelected ? 1 : 0.6,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "10px 14px",
+                      borderRadius: 11,
+                      border: `1px solid ${
+                        isHovered
+                          ? "var(--border)"
+                          : "transparent"
+                      }`,
+                      backgroundColor: isHovered
+                        ? "var(--bg-hover, var(--tag-bg))"
+                        : "transparent",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      transition: "all 0.15s ease",
+                      fontFamily: "inherit",
                     }}
                   >
-                    {isSelected ? "●" : "→"}
-                  </span>
-                </button>
-              );
-            })}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span
+                        style={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: "50%",
+                          backgroundColor: accent,
+                          flexShrink: 0,
+                        }}
+                      />
+                      <div>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: 14,
+                            fontWeight: 600,
+                            color: "var(--text-primary)",
+                            lineHeight: 1.25,
+                          }}
+                        >
+                          {place.name}
+                        </p>
+                        <p
+                          style={{
+                            margin: "3px 0 0",
+                            fontSize: 11.5,
+                            color: "var(--text-muted)",
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          {place.isHome ? "Home Base · Tunisia" : place.region.replace(" · Visited", "")}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: "var(--text-muted)",
+                        opacity: 0.6,
+                      }}
+                    >
+                      →
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* ── Bottom Editorial Detail Bar ── */}
+      {/* ── Bottom Editorial Detail Bar with Previous / Next Stepper ── */}
       <div
         style={{
-          padding: "20px 24px",
+          padding: "22px 26px",
           backgroundColor: "var(--bg-card)",
           display: "flex",
           alignItems: "flex-start",
           justifyContent: "space-between",
           flexWrap: "wrap",
-          gap: 16,
+          gap: 18,
         }}
       >
-        <div style={{ flex: "1 1 420px" }}>
+        <div style={{ flex: "1 1 440px" }}>
           {/* Eyebrow */}
           <div
             style={{
@@ -798,7 +895,7 @@ export default function WorldAtlas() {
           <h3
             style={{
               margin: 0,
-              fontSize: "clamp(1.4rem, 2.5vw, 1.85rem)",
+              fontSize: "clamp(1.5rem, 2.6vw, 1.95rem)",
               fontWeight: 800,
               letterSpacing: "-0.025em",
               color: "var(--text-primary)",
@@ -825,10 +922,10 @@ export default function WorldAtlas() {
             <p
               style={{
                 margin: "10px 0 0",
-                fontSize: 13,
-                lineHeight: 1.7,
+                fontSize: 13.5,
+                lineHeight: 1.75,
                 color: "var(--text-secondary)",
-                maxWidth: 680,
+                maxWidth: 720,
               }}
             >
               {activePlace.description}
@@ -836,42 +933,110 @@ export default function WorldAtlas() {
           )}
         </div>
 
-        {/* Geographic Coordinates Display */}
-        {activePlace && (
-          <div
-            style={{
-              padding: "10px 16px",
-              borderRadius: 12,
-              backgroundColor: "var(--tag-bg)",
-              border: "1px solid var(--border)",
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-            }}
-          >
-            <span
+        {/* Right Action Stack: Coordinates Badge + "← Previous" / "Next →" Stepper */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            gap: 12,
+            flexShrink: 0,
+          }}
+        >
+          {/* Geographic Coordinates Display */}
+          {activePlace && (
+            <div
               style={{
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: "var(--text-muted)",
+                padding: "8px 14px",
+                borderRadius: 10,
+                backgroundColor: "var(--tag-bg)",
+                border: "1px solid var(--border)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                textAlign: "right",
               }}
             >
-              Coordinates
-            </span>
-            <span
-              style={{
-                fontFamily: "monospace",
-                fontSize: 12.5,
-                fontWeight: 700,
-                color: "var(--text-primary)",
-              }}
-            >
-              {activePlace.coordinatesDisplay}
-            </span>
-          </div>
-        )}
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "var(--text-muted)",
+                }}
+              >
+                Coordinates
+              </span>
+              <span
+                style={{
+                  fontFamily: "monospace",
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  color: "var(--text-primary)",
+                }}
+              >
+                {activePlace.coordinatesDisplay}
+              </span>
+            </div>
+          )}
+
+          {/* Stepper Navigation: ← Previous / Next → */}
+          {selectedPlace && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <button
+                onClick={handlePrevPlace}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  backgroundColor: "var(--bg-card)",
+                  color: "var(--text-primary)",
+                  border: "1px solid var(--border)",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  transition: "all 0.15s ease",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--cobalt)")}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+              >
+                ← Previous
+              </button>
+
+              <span
+                style={{
+                  fontSize: 11.5,
+                  fontWeight: 700,
+                  color: "var(--text-muted)",
+                  padding: "0 4px",
+                }}
+              >
+                {currentPlaceIndex + 1} / {PLACES.length}
+              </span>
+
+              <button
+                onClick={handleNextPlace}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  backgroundColor: "var(--bg-card)",
+                  color: "var(--text-primary)",
+                  border: "1px solid var(--border)",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  transition: "all 0.15s ease",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--cobalt)")}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+              >
+                Next →
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

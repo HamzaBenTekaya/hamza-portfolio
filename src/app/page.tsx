@@ -77,39 +77,166 @@ function EyebrowLabel({ children, color }: { children: React.ReactNode; color: s
 }
 
 function TimelineCard({
-  period, title, institution, description, tags, link, linkLabel, highlight, accentColor,
+  id,
+  activeId,
+  onToggle,
+  period,
+  title,
+  institution,
+  description,
+  tags,
+  link,
+  linkLabel,
+  highlight,
+  accentColor,
 }: {
-  period: string; title: string; institution?: string;
-  description: string | React.ReactNode; tags?: string[];
-  link?: string; linkLabel?: string; highlight?: string; accentColor?: string;
+  id?: string;
+  activeId?: string | null;
+  onToggle?: (id: string) => void;
+  period: string;
+  title: string;
+  institution?: string;
+  description: string | React.ReactNode;
+  tags?: string[];
+  link?: string;
+  linkLabel?: string;
+  highlight?: string;
+  accentColor?: string;
 }) {
+  const [localExpanded, setLocalExpanded] = useState(false);
+  const cardId = id ?? title;
+  const isExpanded = activeId !== undefined ? activeId === cardId : localExpanded;
   const dot = accentColor ?? "var(--text-muted)";
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // If the click is inside a link, allow default link action
+    if ((e.target as HTMLElement).closest("a")) return;
+    if (onToggle) {
+      onToggle(cardId);
+    } else {
+      setLocalExpanded(!localExpanded);
+    }
+  };
+
   return (
-    <div style={{ position: "relative", paddingLeft: 28, paddingBottom: 32 }}>
-      <span style={{
-        position: "absolute", left: -5, top: 5,
-        width: 10, height: 10, borderRadius: "50%",
-        border: `2px solid ${dot}`, backgroundColor: "var(--bg)",
-        boxShadow: `0 0 10px ${dot}50`, outline: "3px solid var(--bg)", display: "block",
-      }} />
-      <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 14, padding: "20px 22px" }}>
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dot }}>{period}</span>
-        <h3 style={{ marginTop: 4, fontSize: 16, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.4 }}>{title}</h3>
-        {institution && <p style={{ marginTop: 2, fontSize: 13.5, fontWeight: 500, color: "var(--text-secondary)" }}>{institution}</p>}
+    <div
+      onClick={handleCardClick}
+      style={{
+        position: "relative",
+        paddingLeft: 28,
+        paddingBottom: isExpanded ? 38 : 32,
+        cursor: "pointer",
+        transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+      }}
+    >
+      {/* Spine milestone indicator */}
+      <span
+        style={{
+          position: "absolute",
+          left: isExpanded ? -7 : -5,
+          top: isExpanded ? 4 : 5,
+          width: isExpanded ? 14 : 10,
+          height: isExpanded ? 14 : 10,
+          borderRadius: "50%",
+          border: isExpanded ? `3px solid ${dot}` : `2px solid ${dot}`,
+          backgroundColor: isExpanded ? dot : "var(--bg)",
+          boxShadow: isExpanded ? `0 0 16px ${dot}` : `0 0 10px ${dot}50`,
+          outline: "3px solid var(--bg)",
+          display: "block",
+          transition: "all 0.25s ease",
+          zIndex: 2,
+        }}
+      />
+
+      <div
+        style={{
+          backgroundColor: "var(--bg-card)",
+          border: isExpanded ? `1.5px solid ${dot}` : "1px solid var(--border)",
+          borderRadius: 16,
+          padding: isExpanded ? "26px 28px" : "20px 22px",
+          transform: isExpanded ? "scale(1.015)" : "scale(1)",
+          transformOrigin: "left center",
+          boxShadow: isExpanded
+            ? `0 16px 36px -8px rgba(0, 0, 0, 0.14), 0 0 20px ${dot}20`
+            : "0 2px 8px rgba(0,0,0,0.02)",
+          transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      >
+        {/* Header row with Period + Milestone Status */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dot }}>
+            {period}
+          </span>
+          {isExpanded ? (
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: dot,
+                padding: "2px 9px",
+                borderRadius: 999,
+                backgroundColor: "var(--tag-bg)",
+                border: `1px solid ${dot}40`,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              <span style={{ width: 4, height: 4, borderRadius: "50%", backgroundColor: dot }} />
+              Active Milestone
+            </span>
+          ) : (
+            <span style={{ fontSize: 10.5, fontWeight: 600, color: "var(--text-muted)", opacity: 0.65 }}>
+              Click to focus
+            </span>
+          )}
+        </div>
+
+        <h3
+          style={{
+            marginTop: 6,
+            fontSize: isExpanded ? 17.5 : 16,
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            lineHeight: 1.35,
+            transition: "font-size 0.2s ease",
+          }}
+        >
+          {title}
+        </h3>
+
+        {institution && (
+          <p style={{ marginTop: 3, fontSize: isExpanded ? 14 : 13.5, fontWeight: 500, color: "var(--text-secondary)" }}>
+            {institution}
+          </p>
+        )}
+
         {highlight && (
-          <div style={{ marginTop: 10, display: "inline-flex", alignItems: "center", gap: 7, backgroundColor: "var(--amber-bg)", color: "var(--amber)", border: "1px solid var(--amber-border)", borderRadius: 8, padding: "5px 12px", fontSize: 13, fontWeight: 700 }}>
+          <div style={{ marginTop: 12, display: "inline-flex", alignItems: "center", gap: 7, backgroundColor: "var(--amber-bg)", color: "var(--amber)", border: "1px solid var(--amber-border)", borderRadius: 8, padding: "5px 12px", fontSize: 13, fontWeight: 700 }}>
             <span>★</span> {highlight}
           </div>
         )}
-        <div style={{ marginTop: 12, fontSize: 14, lineHeight: 1.75, color: "var(--text-secondary)" }}>{description}</div>
+
+        <div style={{ marginTop: 12, fontSize: isExpanded ? 14.5 : 14, lineHeight: isExpanded ? 1.85 : 1.75, color: "var(--text-secondary)", transition: "all 0.2s ease" }}>
+          {description}
+        </div>
+
         {link && (
-          <a href={link} target="_blank" rel="noopener noreferrer" style={{ marginTop: 10, display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13.5, fontWeight: 600, color: dot, textDecoration: "none" }}
+          <a
+            href={link}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ marginTop: 12, display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13.5, fontWeight: 600, color: dot, textDecoration: "none" }}
             onMouseEnter={e => (e.currentTarget.style.opacity = "0.7")}
-            onMouseLeave={e => (e.currentTarget.style.opacity = "1")}>
+            onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+          >
             {linkLabel ?? link}
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 2.5h7v7M2.5 9.5 9.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
           </a>
         )}
+
         {tags && tags.length > 0 && <TagRow tags={tags} />}
       </div>
     </div>
@@ -302,6 +429,12 @@ function NavBar() {
 // ─── Main Page ─────────────────────────────────────────────────────────────
 export default function Page() {
   const [modalOpen, setModalOpen] = useState(false);
+  const [activeMilestone, setActiveMilestone] = useState<string | null>(null);
+  const [activeInterest, setActiveInterest] = useState<string | null>(null);
+
+  const handleMilestoneToggle = (id: string) => {
+    setActiveMilestone((prev) => (prev === id ? null : id));
+  };
 
   const container: React.CSSProperties = { maxWidth: 1024, margin: "0 auto", padding: "0 24px" };
 
@@ -432,6 +565,9 @@ export default function Page() {
           <div style={{ borderLeft: "1.5px solid var(--amber-border)", marginLeft: 5 }}>
             {/* Newest to oldest */}
             <TimelineCard
+              id="acad-bac"
+              activeId={activeMilestone}
+              onToggle={handleMilestoneToggle}
               period="2026"
               title="Technical Baccalaureate Distinction"
               institution="Sousse Pioneer High School (Lycée Pilote de Sousse) — Technical Stream"
@@ -441,6 +577,9 @@ export default function Page() {
               tags={["Technical Baccalaureate", "Highest Honors", "Top 2.51% Nationally"]}
             />
             <TimelineCard
+              id="acad-pioneer-school"
+              activeId={activeMilestone}
+              onToggle={handleMilestoneToggle}
               period="2022 – 2026"
               title="Sousse Pioneer Middle & High School"
               institution="Tunisia's most competitive & selective public educational system"
@@ -449,6 +588,9 @@ export default function Page() {
               tags={["Sousse Pioneer High School", "Pioneer Entrance Exam", "Pioneer Schools"]}
             />
             <TimelineCard
+              id="acad-pioneer-exam"
+              activeId={activeMilestone}
+              onToggle={handleMilestoneToggle}
               period="End of Primary School"
               title="National Pioneer Entrance Exam"
               institution="Competitive National Entrance Exam for Pioneer Schools"
@@ -457,6 +599,9 @@ export default function Page() {
               tags={["Pioneer Entrance Exam", "National Exam", "Academic Distinction"]}
             />
             <TimelineCard
+              id="acad-stem-math"
+              activeId={activeMilestone}
+              onToggle={handleMilestoneToggle}
               period="Grades 6 & 7"
               title="Early STEM & Mathematical Foundations"
               institution="Kangaroo Mathematics Competition"
@@ -476,6 +621,9 @@ export default function Page() {
 
           <div style={{ borderLeft: "1.5px solid var(--cobalt-border)", marginLeft: 5 }}>
             <TimelineCard
+              id="exp-iot"
+              activeId={activeMilestone}
+              onToggle={handleMilestoneToggle}
               period="2026 – Present"
               title="Industrial IoT & Predictive Maintenance System"
               institution="Family Brick Factory — R&D"
@@ -484,6 +632,9 @@ export default function Page() {
               tags={["IoT", "Embedded Systems", "Predictive Maintenance", "Arduino", "Local Network", "R&D"]}
             />
             <TimelineCard
+              id="exp-misterio"
+              activeId={activeMilestone}
+              onToggle={handleMilestoneToggle}
               period="2026 – Present"
               title="Founder & Operator — Ell-Misterio"
               institution="Online Curated Mystery Football Jersey Brand — Tunisia"
@@ -492,6 +643,9 @@ export default function Page() {
               tags={["E-commerce", "Founder", "Brand", "Football"]}
             />
             <TimelineCard
+              id="exp-repair"
+              activeId={activeMilestone}
+              onToggle={handleMilestoneToggle}
               period="2025 – Present"
               title="Founder — Phone, Laptop & Console Repair Micro-Business"
               institution="Sousse, Tunisia · Self-Employed"
@@ -500,6 +654,9 @@ export default function Page() {
               tags={["Hardware Repair", "Electronics", "Console Refurbishment", "Diagnostics", "Self-Employed"]}
             />
             <TimelineCard
+              id="exp-photo"
+              activeId={activeMilestone}
+              onToggle={handleMilestoneToggle}
               period="2024 – Present"
               title="Freelance Brand Photographer"
               institution="Canon EOS 250D · @7amza_bt_photography"
@@ -510,6 +667,9 @@ export default function Page() {
               tags={["Photography", "Adobe Lightroom", "Canon EOS 250D", "Commercial", "Brand Visuals"]}
             />
             <TimelineCard
+              id="exp-bks"
+              activeId={activeMilestone}
+              onToggle={handleMilestoneToggle}
               period="Recurring Summers"
               title="Summer Intern — BKS"
               institution="Industrial Internship · Sousse, Tunisia"
@@ -534,6 +694,9 @@ export default function Page() {
             </div>
             <div style={{ borderLeft: "1.5px solid var(--cobalt-border)", marginLeft: 5 }}>
               <TimelineCard
+                id="proj-irrigation"
+                activeId={activeMilestone}
+                onToggle={handleMilestoneToggle}
                 period="2024"
                 title="Automated Smart Irrigation System"
                 institution="High School Engineering Project"
@@ -542,6 +705,9 @@ export default function Page() {
                 tags={["Arduino", "IoT", "Sensors", "Bluetooth", "Embedded C", "Engineering Project"]}
               />
               <TimelineCard
+                id="proj-gomycode"
+                activeId={activeMilestone}
+                onToggle={handleMilestoneToggle}
                 period="GoMyCode Training"
                 title="Software & Game Development"
                 institution="GoMyCode"
@@ -559,6 +725,9 @@ export default function Page() {
             </div>
             <div style={{ borderLeft: "1.5px solid var(--crimson-border)", marginLeft: 5 }}>
               <TimelineCard
+                id="lead-rotary"
+                activeId={activeMilestone}
+                onToggle={handleMilestoneToggle}
                 period="2026 – Ongoing"
                 title="Member — Rotary Sidi Bou Said Le Baron"
                 institution="Rotary International Club · Tunisia"
@@ -567,6 +736,9 @@ export default function Page() {
                 tags={["Rotary", "Leadership", "Community"]}
               />
               <TimelineCard
+                id="lead-f1sahel"
+                activeId={activeMilestone}
+                onToggle={handleMilestoneToggle}
                 period="Feb 2024 – Present"
                 title="Founder — F1 Sahel Community"
                 institution="Regional Formula 1 Motorsport Community"
@@ -577,6 +749,9 @@ export default function Page() {
                 tags={["Founder", "Leadership", "Formula 1", "F1", "Community", "Event Organisation", "Motorsport"]}
               />
               <TimelineCard
+                id="lead-artclub"
+                activeId={activeMilestone}
+                onToggle={handleMilestoneToggle}
                 period="2 Years"
                 title="Media Head — Art Club, Sousse Pioneer High School"
                 institution="Sousse Pioneer High School"
@@ -668,15 +843,42 @@ export default function Page() {
                 color: "var(--amber)",
                 tags: ["Gymnastics", "LEGO Technic", "Kangaroo Mathematics Competition", "Mathematical Foundations"],
               },
-            ].map(({ period, title, desc, color, tags }) => (
-              <div key={title} style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 16, padding: "22px 24px", position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, backgroundColor: color }} />
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color }}>{period}</span>
-                <h3 style={{ marginTop: 8, fontSize: 15, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.4 }}>{title}</h3>
-                <p style={{ marginTop: 8, fontSize: 13.5, lineHeight: 1.7, color: "var(--text-secondary)" }}>{desc}</p>
-                <TagRow tags={tags} />
-              </div>
-            ))}
+            ].map(({ period, title, desc, color, tags }) => {
+              const isSelected = activeInterest === title;
+              return (
+                <div
+                  key={title}
+                  onClick={() => setActiveInterest((prev) => (prev === title ? null : title))}
+                  style={{
+                    backgroundColor: "var(--bg-card)",
+                    border: isSelected ? `1.5px solid ${color}` : "1px solid var(--border)",
+                    borderRadius: 16,
+                    padding: isSelected ? "24px 26px" : "22px 24px",
+                    position: "relative",
+                    overflow: "hidden",
+                    cursor: "pointer",
+                    transform: isSelected ? "scale(1.015)" : "scale(1)",
+                    boxShadow: isSelected
+                      ? `0 14px 32px -6px rgba(0,0,0,0.12), 0 0 16px ${color}20`
+                      : "none",
+                    transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+                  }}
+                >
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, backgroundColor: color }} />
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color }}>{period}</span>
+                    {isSelected && (
+                      <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color, padding: "1px 7px", borderRadius: 999, backgroundColor: "var(--tag-bg)", border: `1px solid ${color}40` }}>
+                        Focused
+                      </span>
+                    )}
+                  </div>
+                  <h3 style={{ marginTop: 8, fontSize: isSelected ? 16 : 15, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.35 }}>{title}</h3>
+                  <p style={{ marginTop: 8, fontSize: isSelected ? 14 : 13.5, lineHeight: 1.75, color: "var(--text-secondary)" }}>{desc}</p>
+                  <TagRow tags={tags} />
+                </div>
+              );
+            })}
           </div>
 
           {/* World Atlas */}
